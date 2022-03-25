@@ -1,0 +1,17 @@
+@import "../styles/colors.scss";
+.stack {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  width: 100%;
+  &-text {
+    color: $silver;
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+  &-lights {
+    display: flex;
+    width: 10rem;
+    justify-content: space-between;
+  }
+}

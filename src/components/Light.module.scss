@@ -1,0 +1,33 @@
+@import "../styles/colors.scss";
+
+.light {
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 25px;
+  opacity: 0.2;
+  &-red {
+    background-color: $red;
+    opacity: 0.1;
+  }
+  &-yellow {
+    background-color: $yellow;
+    opacity: 0.1;
+  }
+  &-green {
+    background-color: $green-open;
+    opacity: 0.1;
+  }
+  &-active {
+    opacity: 1;
+  }
+}
+.blinking {
+  opacity: 1;
+  animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
