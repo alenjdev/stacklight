@@ -8,6 +8,10 @@ interface IStackLightProps {
 }
 
 export const StackLight: FC<IStackLightProps> = ({ device }) => {
+  const [redLight, setRedLight] = useState(0);
+  const [yellowLight, setYellowLight] = useState(0);
+  const [greenLight, setGreenLight] = useState(0);
+
   const [lights, setLights] = useState({
     red: 0,
     yellow: 0,
@@ -18,45 +22,63 @@ export const StackLight: FC<IStackLightProps> = ({ device }) => {
     App.addModuleDataListener(setData);
   }, [device]);
 
+  const shouldClearData = (
+    lastUpdate: number,
+    scruttingTime: number,
+    seconds: number
+  ) => {
+    return lastUpdate + seconds * 1000 < scruttingTime;
+  };
+
   const setData = (newValue: ModuleData) => {
     const streams = newValue.streams;
     if (Object.keys(streams).length === 0) {
       throw new Error("No streams.");
     }
-    const currentState = lights;
-    Object.keys(streams).forEach((stream, idx) => {
+
+    Object.keys(streams).forEach((stream) => {
       const latestState = getLatestData(streams, stream);
       if (typeof latestState !== "string" && latestState !== undefined) {
-        if (streams[stream].data[0].name === "green.light")
-          currentState.green = latestState;
-        if (streams[stream].data[0].name === "yellow.light")
-          currentState.yellow = latestState;
-        if (streams[stream].data[0].name === "red.light")
-          currentState.red = latestState;
+        if (streams[stream].data[0].name === "green.light") {
+          if (shouldClearData(latestState[0], newValue.time, 10)) {
+            setGreenLight(0);
+            return;
+          }
+          setGreenLight(latestState[1]);
+        }
+        if (streams[stream].data[0].name === "yellow.light") {
+          if (shouldClearData(latestState[0], newValue.time, 10)) {
+            setYellowLight(0);
+            return;
+          }
+          setYellowLight(latestState[1]);
+        }
+        if (streams[stream].data[0].name === "red.light") {
+          if (shouldClearData(latestState[0], newValue.time, 10)) {
+            setRedLight(0);
+            return;
+          }
+          setRedLight(latestState[1]);
+        }
       }
     });
-    if (JSON.stringify(lights) !== JSON.stringify(currentState)) {
-      setLights(currentState);
-    }
   };
 
   return (
     <div className={styles.stack}>
       <span className={styles["stack-text"]}>Stack Light Status</span>
       <div className={styles["stack-lights"]}>
-        <Light status={lights.red} color="red" />
-        <Light status={lights.yellow} color="yellow" />
-        <Light status={lights.green} color="green" />
+        <Light status={redLight} color="red" />
+        <Light status={yellowLight} color="yellow" />
+        <Light status={greenLight} color="green" />
       </div>
     </div>
   );
 };
 const getLatestData = (
-  moduleData: {
-    [stream_name: string]: Stream;
-  },
+  moduleData: any,
   stream: string
-): number | undefined | string => {
+): any | undefined | string => {
   if (moduleData[stream] === undefined) {
     return "No stream.";
   }
@@ -74,5 +96,5 @@ const getLatestData = (
   if (!latestPoint) {
     return "No datapoints.";
   }
-  return latestPoint[1];
+  return latestPoint;
 };
